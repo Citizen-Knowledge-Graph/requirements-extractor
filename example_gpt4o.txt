@@ -1,0 +1,80 @@
+This file provides:
+1. A text prompt example to be used with GPT-4o to analyse content from the Bundesagentur für Arbeit and identify the eligibility conditions
+2. Output example of the GPT model in SHACL format
+
+1. Prompt:
+----------
+"Visit the following website and find relevant criteria regarding the eligibility conditions to apply for that
+money support: https://www.arbeitsagentur.de/familie-und-kinder/kinderzuschlag-verstehen/kinderzuschlag-anspruch-hoehe-dauer
+
+I want then, the conditions to be eligible to be structured in SHACL format."
+
+2. Output:
+----------
+"
+Here are the eligibility criteria for applying for the Kinderzuschlag (child supplement) structured in SHACL format:
+
+@prefix ex: <http://example.org/> .
+
+ex:KinderzuschlagEligibilityShape
+    a sh:NodeShape ;
+    sh:targetClass ex:Family ;
+    
+    sh:property [
+        sh:path ex:child ;
+        sh:node ex:ChildShape ;
+        sh:message "The child must live in the applicant's household, be under 25 years old, and not married or in a registered partnership." ;
+    ] ;
+    
+    sh:property [
+        sh:path ex:kindergeld ;
+        sh:hasValue true ;
+        sh:message "The applicant must receive Kindergeld or a comparable benefit for the child." ;
+    ] ;
+    
+    sh:property [
+        sh:path ex:income ;
+        sh:minInclusive 900 ;
+        sh:maxInclusive 3000 ;
+        sh:message "The family's gross income must be at least 900 euros (couples) or 600 euros (single parents) per month." ;
+    ] ;
+    
+    sh:property [
+        sh:path ex:sufficientFunds ;
+        sh:hasValue true ;
+        sh:message "The family must have sufficient funds for their maintenance when combined with the Kinderzuschlag and possibly housing benefit." ;
+    ] ;
+    
+    sh:property [
+        sh:path ex:wealth ;
+        sh:maxInclusive 55000 ;
+        sh:message "The family's wealth must not exceed certain limits (e.g., 55,000 euros for two people)." ;
+    ] ;
+    
+    sh:property [
+        sh:path ex:childCount ;
+        sh:minCount 1 ;
+        sh:message "The family must have at least one child." ;
+    ] ;
+.
+
+ex:ChildShape
+    a sh:NodeShape ;
+    sh:property [
+        sh:path ex:age ;
+        sh:maxInclusive 24 ;
+    ] ;
+    
+    sh:property [
+        sh:path ex:maritalStatus ;
+        sh:not [
+            sh:hasValue ex:Married ;
+            sh:hasValue ex:InRegisteredPartnership ;
+        ] ;
+    ] ;
+.
+
+This SHACL shape ensures that families meet the specific criteria for receiving Kinderzuschlag, 
+such as having children under 25 who are not married, receiving Kindergeld, having sufficient income and 
+wealth, and having enough funds for family maintenance.
+"
